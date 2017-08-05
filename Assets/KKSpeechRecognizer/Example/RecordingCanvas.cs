@@ -78,6 +78,28 @@ public class RecordingCanvas : MonoBehaviour {
 		} else {
 			resultText.text = "NO COMMAND, YOU: " + resultText.text;
 		}
+
+		/* Now parse using an NLP API. */
+		resultText.text += this.POSTRequest ("https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment", resultText.text);
+	}
+
+	public string POSTRequest(string url, string text) {
+		WWWForm form = new WWWForm();
+		form.headers ["Ocp-Apim-Subscription-Key"] = "dc458677da564056ab9fa0403b593fb8";
+		form.AddField("language", "en");
+		form.AddField("id", "nlpHack");
+		form.AddField("text", text);
+
+		WWW www = new WWW(url, form);
+		return WaitForRequest (www);
+	}
+
+	string WaitForRequest(WWW www) {
+			if (www.error == null) {
+				return www.text;
+			} else {
+				return www.error;
+			}
 	}
 
 	public void OnPartialResult(string result) {
