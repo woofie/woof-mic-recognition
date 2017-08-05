@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 using KKSpeech;
+using System.Collections.Generic;
+using System.Text;
 
 public class RecordingCanvas : MonoBehaviour {
 
@@ -37,7 +40,11 @@ public class RecordingCanvas : MonoBehaviour {
 			/* As for permission to record. */
 			SpeechRecognizer.RequestAccess();
 		} else {
-			resultText.text = "Sorry, but this device doesn't support speech recognition";
+			WWW req = this.POSTRequest ("https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment",
+										"This is just a test debug string, hopefully I can get some sentiment analysis going.");
+			while (!req.isDone) {}
+			resultText.text = "RESP: " +  req.text;
+
 			startRecordingButton.enabled = false;
 		}
 	}
@@ -67,39 +74,58 @@ public class RecordingCanvas : MonoBehaviour {
 				for (int j = 0; j < (commands.Length); j++) {
 					if (blocks [i] == commands [j]) {
 						command = commands [j];
+
 						break;
 					}
 				}
 			}
 		}
 
+		/* Now parse using an NLP API. */
+		// resultText.text += this.POSTRequest ("https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment", resultText.text);
+
+
+		/* And also add to the body. */
 		if (command != "") {
-			resultText.text = "COMMAND RECOGNISED: " + command;
+			resultText.text = "COMMAND RECOGNISED: " + command + ", YOU SAID: " + resultText.text;
 		} else {
-			resultText.text = "NO COMMAND, YOU: " + resultText.text;
+			resultText.text = "NO COMMAND, YOU SAID: " + resultText.text;
 		}
 
-		/* Now parse using an NLP API. */
-		resultText.text += this.POSTRequest ("https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment", resultText.text);
+		WWW req = this.POSTRequest ("https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment", resultText.text);
+
+		while (!req.isDone) {}
+
+		resultText.text += req.text;
 	}
 
-	public string POSTRequest(string url, string text) {
+	public WWW POSTRequest(string url, string text) {
+		WWW www;
+
 		WWWForm form = new WWWForm();
-		form.headers ["Ocp-Apim-Subscription-Key"] = "dc458677da564056ab9fa0403b593fb8";
+		Dictionary<string,string> headers = form.headers;
+
 		form.AddField("language", "en");
-		form.AddField("id", "nlpHack");
+		form.AddField("id", "enNlpHack4");
 		form.AddField("text", text);
 
-		WWW www = new WWW(url, form);
-		return WaitForRequest (www);
+		headers["Ocp-Apim-Subscription-Key"] = "dc458677da564056ab9fa0403b593fb8";
+		headers["Content-Type"] = "application/json";
+
+		www = new WWW(url, Encoding.ASCII.GetBytes("{'documents': [{'language': 'en', 'id':'enlpHack5', 'text': '" + text + "'}]}"), headers);
+		StartCoroutine(WaitForRequest(www));
+
+		return www;
 	}
 
-	string WaitForRequest(WWW www) {
-			if (www.error == null) {
-				return www.text;
-			} else {
-				return www.error;
-			}
+	IEnumerator WaitForRequest(WWW data) {
+		yield return data;
+
+		if (data.error != null) {
+			Debug.Log("There was an error sending request: " + data.error);
+		} else {
+			Debug.Log("WWW Request: " + data.text);
+		}
 	}
 
 	public void OnPartialResult(string result) {
