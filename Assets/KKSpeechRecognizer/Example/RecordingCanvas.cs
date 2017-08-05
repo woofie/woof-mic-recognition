@@ -56,7 +56,7 @@ public class RecordingCanvas : MonoBehaviour {
 		for (int i=0; i < ((blocks.Length > 10) ? 10 : blocks.Length); i++) {
 			if (blocks [i] == "dog" || blocks [i] == "dawg" || blocks[i] == "doggy" || blocks[i] == "doggie" || blocks[i] == "Dogg") {
 				score1++;
-			} else if (blocks [i] == "hey" || blocks[i] == "hi" || blocks[i] == "hello" || blocks[i] == "good" || blocks[i] == "bad") {
+			} else if (blocks [i] == "hey" || blocks [i] == "yo"  || blocks[i] == "hi" || blocks[i] == "hello" || blocks[i] == "good" || blocks[i] == "bad") {
 				score2++;
 			}
 		}
