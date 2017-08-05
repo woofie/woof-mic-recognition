@@ -84,6 +84,7 @@ public class RecordingCanvas : MonoBehaviour {
 		/* Now parse using an NLP API. */
 		// resultText.text += this.POSTRequest ("https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment", resultText.text);
 
+		WWW req = this.POSTRequest ("https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment", resultText.text);
 
 		/* And also add to the body. */
 		if (command != "") {
@@ -91,9 +92,7 @@ public class RecordingCanvas : MonoBehaviour {
 		} else {
 			resultText.text = "NO COMMAND, YOU SAID: " + resultText.text;
 		}
-
-		WWW req = this.POSTRequest ("https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment", resultText.text);
-
+			
 		while (!req.isDone) {}
 
 		resultText.text += req.text;
@@ -112,7 +111,10 @@ public class RecordingCanvas : MonoBehaviour {
 		headers["Ocp-Apim-Subscription-Key"] = "dc458677da564056ab9fa0403b593fb8";
 		headers["Content-Type"] = "application/json";
 
-		www = new WWW(url, Encoding.ASCII.GetBytes("{'documents': [{'language': 'en', 'id':'enlpHack5', 'text': '" + text + "'}]}"), headers);
+		string str = "{'documents': [{'language': 'en', 'id':'enlpHack5', 'text': '" + text.Replace("'", @"\'") + "'}]}";
+		Debug.Log (str);
+
+		www = new WWW(url, Encoding.ASCII.GetBytes(str), headers);
 		StartCoroutine(WaitForRequest(www));
 
 		return www;
