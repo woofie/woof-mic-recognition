@@ -19,7 +19,8 @@ public class RecordingCanvas : MonoBehaviour {
 		"good",
 		"bad",
 		"dead", // play dead
-		"speak"
+		"speak",
+		"fetch",
 	};
 	public string command;
 
@@ -92,7 +93,7 @@ public class RecordingCanvas : MonoBehaviour {
 		} else {
 			resultText.text = "NO COMMAND, YOU SAID: " + resultText.text;
 		}
-			
+
 		while (!req.isDone) {}
 
 		resultText.text += req.text;
